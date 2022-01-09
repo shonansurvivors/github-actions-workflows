@@ -1,0 +1,21 @@
+name: Terraform CI
+
+on:
+  workflow_call:
+    inputs:
+      terraform_version:
+        required: true
+        type: string
+
+jobs:
+  ci:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: ${{ inputs.terraform_version }}
+
+      - run: terraform fmt -recursive -check
