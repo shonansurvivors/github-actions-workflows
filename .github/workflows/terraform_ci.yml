@@ -18,4 +18,5 @@ jobs:
         with:
           terraform_version: ${{ inputs.terraform_version }}
 
-      - run: terraform fmt -recursive -check
+      - run: terraform fmt -recursive -check -diff -list=false
+
