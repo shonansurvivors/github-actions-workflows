@@ -51,7 +51,7 @@ jobs:
       - name: Detect dirs containing created or updated *.tf
         id: set-matrix
         run: |
-          dirs=$(git diff HEAD..origin/main --diff-filter=d --name-only --relative=${{ inputs.git_diff_relative }} | grep -E "\.tf$" | xargs -I {} dirname {} | uniq | jq -R -s -c 'split("\n")[:-1]')
+          dirs=$(git diff origin/main...HEAD --diff-filter=d --name-only --relative=${{ inputs.git_diff_relative }} | grep -E "\.tf$" | xargs -I {} dirname {} | uniq | jq -R -s -c 'split("\n")[:-1]')
           echo $dirs
           echo "::set-output name=dirs::${dirs}"
 
