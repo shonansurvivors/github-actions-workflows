@@ -15,7 +15,7 @@ on:
         required: false
         type: string
         default: .
-      tf_update_target:
+      tfupdate_target:
         required: false
         type: string
         default: '["terraform","aws"]'
@@ -34,7 +34,7 @@ jobs:
       fail-fast: false
       max-parallel: 1
       matrix:
-        TFUPDATE_TARGET: ${{ fromJson(inputs.tf_update_target) }}
+        TFUPDATE_TARGET: ${{ fromJson(inputs.tfupdate_target) }}
 
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
