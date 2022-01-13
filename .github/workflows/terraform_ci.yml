@@ -6,6 +6,11 @@ on:
       terraform_version:
         required: true
         type: string
+
+      git_diff_relative:
+        required: false
+        type: string
+        default: ''
       tflint_version:
         required: false
         type: string
@@ -35,9 +40,6 @@ jobs:
   set-matrix:
     runs-on: ubuntu-20.04
 
-    env:
-      TF_ROOT_DIR: .
-
     outputs:
       dirs: ${{ steps.set-matrix.outputs.dirs }}
 
@@ -49,7 +51,7 @@ jobs:
       - name: Detect dirs containing created or updated *.tf
         id: set-matrix
         run: |
-          dirs=$(git diff HEAD..origin/main --diff-filter=d --name-only | grep -E "\.tf$" | xargs -I {} dirname {} | uniq | jq -R -s -c 'split("\n")[:-1]')
+          dirs=$(git diff HEAD..origin/main --diff-filter=d --name-only --relative=${{ inputs.git_diff_relative }} | grep -E "\.tf$" | xargs -I {} dirname {} | uniq | jq -R -s -c 'split("\n")[:-1]')
           echo $dirs
           echo "::set-output name=dirs::${dirs}"
 
