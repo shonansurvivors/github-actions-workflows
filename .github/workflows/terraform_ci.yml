@@ -66,17 +66,12 @@ jobs:
       matrix:
         TF_DIR: ${{ fromJson(needs.set-matrix.outputs.dirs) }}
 
-    env:
-      TF_DIR: ${{ matrix.TF_DIR }}
-      TFLINT_VERSION: ${{ inputs.tflint_version }}
-      TFLINT_AWS_VERSION: ${{ inputs.tflint_aws_version }}
-
     steps:
       - uses: actions/checkout@v2
 
       - uses: terraform-linters/setup-tflint@641d8fa8495e4b3250dcb9f31b57d01ac7c5af5c #v0.34.1
         with:
-          tflint_version: ${{ env.TFLINT_VERSION }}
+          tflint_version: ${{ inputs.TFLINT_VERSION }}
 
       - name: Generate .tflint.hcl
         if: inputs.generate_tflint_hcl
@@ -84,14 +79,14 @@ jobs:
           cat <<EOF > .tflint.hcl
           plugin "aws" {
               enabled = true
-              version = "${{ env.TFLINT_AWS_VERSION }}"
+              version = "${{ inputs.TFLINT_AWS_VERSION }}"
               source  = "github.com/terraform-linters/tflint-ruleset-aws"
           }
           EOF
-        working-directory: ${{ env.TF_DIR }}
+        working-directory: ${{ matrix.TF_DIR }}
 
       - name: Run tflint
         run: |
           tflint --init
           tflint
-        working-directory: ${{ env.TF_DIR }}
+        working-directory: ${{ matrix.TF_DIR }}
