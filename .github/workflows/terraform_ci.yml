@@ -71,7 +71,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: terraform-linters/setup-tflint@641d8fa8495e4b3250dcb9f31b57d01ac7c5af5c #v0.34.1
+      - uses: terraform-linters/setup-tflint@7cf6558386ea02736c0a5edd3031f39c2dfeb206 #v1.1.0
         with:
           tflint_version: ${{ inputs.TFLINT_VERSION }}
 
