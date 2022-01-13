@@ -6,9 +6,21 @@ on:
       terraform_version:
         required: true
         type: string
+      tflint_version:
+        required: false
+        type: string
+        default: v0.34.1
+      tflint_aws_version:
+        required: false
+        type: string
+        default: 0.11.0
+      generate_tflint_hcl:
+        required: false
+        type: boolean
+        default: true
 
 jobs:
-  ci:
+  fmt:
     runs-on: ubuntu-20.04
 
     steps:
@@ -20,3 +32,66 @@ jobs:
 
       - run: terraform fmt -recursive -check -diff -list=false
 
+  set-matrix:
+    runs-on: ubuntu-20.04
+
+    env:
+      TF_ROOT_DIR: .
+
+    outputs:
+      dirs: ${{ steps.set-matrix.outputs.dirs }}
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Detect dirs containing created or updated *.tf
+        id: set-matrix
+        run: |
+          dirs=$(git diff HEAD..origin/main --diff-filter=d --name-only | grep -E "\.tf$" | xargs -I {} dirname {} | uniq | jq -R -s -c 'split("\n")[:-1]')
+          echo $dirs
+          echo "::set-output name=dirs::${dirs}"
+
+  tflint:
+    needs: set-matrix
+
+    if: needs.set-matrix.outputs.dirs != '[]'
+
+    runs-on: ubuntu-20.04
+
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        TF_DIR: ${{ fromJson(needs.set-matrix.outputs.dirs) }}
+
+    env:
+      TF_DIR: ${{ matrix.TF_DIR }}
+      TFLINT_VERSION: ${{ inputs.tflint_version }}
+      TFLINT_AWS_VERSION: ${{ inputs.tflint_aws_version }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: terraform-linters/setup-tflint@v1
+        with:
+          tflint_version: ${{ env.TFLINT_VERSION }}
+
+      - name: Generate .tflint.hcl
+        if: inputs.generate_tflint_hcl
+        run: |
+          cat <<EOF > .tflint.hcl
+          plugin "aws" {
+              enabled = true
+              version = "${{ env.TFLINT_AWS_VERSION }}"
+              source  = "github.com/terraform-linters/tflint-ruleset-aws"
+          }
+          EOF
+        working-directory: ${{ env.TF_DIR }}
+
+      - name: Run tflint
+        run: |
+          tflint --init
+          tflint
+        working-directory: ${{ env.TF_DIR }}
