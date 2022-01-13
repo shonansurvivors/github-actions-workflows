@@ -30,7 +30,7 @@ jobs:
         with:
           terraform_version: ${{ inputs.terraform_version }}
 
-      - run: terraform fmt -recursive -check -diff -list=false
+      - run: terraform fmt -recursive -check -diff
 
   set-matrix:
     runs-on: ubuntu-20.04
