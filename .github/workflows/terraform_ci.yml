@@ -14,15 +14,11 @@ on:
       tflint_version:
         required: false
         type: string
-        default: v0.34.1
-      tflint_aws_version:
+        default: 0.34.1
+      tflint_hcl_path:
         required: false
         type: string
-        default: 0.11.0
-      generate_tflint_hcl:
-        required: false
-        type: boolean
-        default: true
+        default: ./.tflint.hcl
 
 jobs:
   fmt:
@@ -58,7 +54,7 @@ jobs:
   tflint:
     needs: set-matrix
 
-    if: needs.set-matrix.outputs.dirs != '[]'
+    if: needs.set-matrix.outputs.dirs != '[]' && inputs.tflint_hcl_path
 
     runs-on: ubuntu-20.04
 
@@ -73,22 +69,10 @@ jobs:
 
       - uses: terraform-linters/setup-tflint@7cf6558386ea02736c0a5edd3031f39c2dfeb206 #v1.1.0
         with:
-          tflint_version: ${{ inputs.TFLINT_VERSION }}
-
-      - name: Generate .tflint.hcl
-        if: inputs.generate_tflint_hcl
-        run: |
-          cat <<EOF > .tflint.hcl
-          plugin "aws" {
-              enabled = true
-              version = "${{ inputs.TFLINT_AWS_VERSION }}"
-              source  = "github.com/terraform-linters/tflint-ruleset-aws"
-          }
-          EOF
-        working-directory: ${{ matrix.TF_DIR }}
+          tflint_version: v${{ inputs.TFLINT_VERSION }}
 
       - name: Run tflint
         run: |
           tflint --init
-          tflint
+          tflint --config=${{ env.GITHUB_WORKSPACE }}/${{ inputs.tflint_hcl_path }}
         working-directory: ${{ matrix.TF_DIR }}
