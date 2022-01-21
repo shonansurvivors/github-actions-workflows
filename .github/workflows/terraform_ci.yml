@@ -22,7 +22,7 @@ on:
       tflint_hcl_path:
         required: false
         type: string
-        default: ./.tflint.hcl
+        default: .tflint.hcl
 
 jobs:
   fmt:
