@@ -17,7 +17,7 @@ on:
         default: 0.34.1
       own_tflint_hcl_exists:
         required: false
-        type: string
+        type: boolean
         default: false
       tflint_hcl_path:
         required: false
