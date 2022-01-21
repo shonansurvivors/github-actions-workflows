@@ -15,6 +15,10 @@ on:
         required: false
         type: string
         default: 0.34.1
+      own_tflint_hcl_exists:
+        required: false
+        type: string
+        default: false
       tflint_hcl_path:
         required: false
         type: string
@@ -54,7 +58,7 @@ jobs:
   tflint:
     needs: set-matrix
 
-    if: needs.set-matrix.outputs.dirs != '[]' && inputs.tflint_hcl_path
+    if: needs.set-matrix.outputs.dirs != '[]'
 
     runs-on: ubuntu-20.04
 
@@ -70,6 +74,11 @@ jobs:
       - uses: terraform-linters/setup-tflint@7cf6558386ea02736c0a5edd3031f39c2dfeb206 #v1.1.0
         with:
           tflint_version: v${{ inputs.TFLINT_VERSION }}
+
+      - name: Download ready-made .tflint.hcl
+        if: ${{ !inputs.own_tflint_hcl_exists }}
+        run: |
+          curl -O https://raw.githubusercontent.com/shonansurvivors/github-actions-workflows/main/.tflint.hcl
 
       - name: Run tflint
         run: |
