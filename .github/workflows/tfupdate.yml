@@ -91,10 +91,10 @@ jobs:
         run: |
           find . -type f -name .terraform-version | xargs sed -i -e "s/[0-9.]\+/$(tfupdate release latest hashicorp/terraform)/g"
 
-      - name: Update terraform_version in GitHub Actions workflow files
-        if: env.TFUPDATE_TARGET == 'terraform'
-        run: |
-          sed -i -e "s/terraform_version: [0-9.]\+/terraform_version: $(tfupdate release latest hashicorp/terraform)/g" .github/workflows/*
+#      - name: Update terraform_version in GitHub Actions workflow files
+#        if: env.TFUPDATE_TARGET == 'terraform'
+#        run: |
+#          sed -i -e "s/terraform_version: [0-9.]\+/terraform_version: $(tfupdate release latest hashicorp/terraform)/g" .github/workflows/*
 
       - uses: EndBug/add-and-commit@8c12ff729a98cfbcd3fe38b49f55eceb98a5ec02 #v7.5
         if: env.TFUPDATE_TARGET == 'terraform'
