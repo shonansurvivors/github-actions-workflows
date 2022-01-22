@@ -86,20 +86,20 @@ jobs:
       - if: env.TFUPDATE_TARGET != 'terraform'
         run: tfupdate provider -r ${{ env.TFUPDATE_TARGET }} .
 
-      - uses: EndBug/add-and-commit@8c12ff729a98cfbcd3fe38b49f55eceb98a5ec02 #v7.5
+      - name: Update .terraform-version
         if: env.TFUPDATE_TARGET == 'terraform'
-        with:
-          branch: ${{ env.TFUPDATE_BRANCH }}
-          message: "tfupdate terraform -r ."
+        run: |
+          find . -type f -name .terraform-version | xargs sed -i -e "s/[0-9.]\+/$(tfupdate release latest hashicorp/terraform)/g"
 
-      # Todo: Update Terraform version definition in other workflow yml
+      - name: Update terraform_version in GitHub Actions workflow files
+        if: env.TFUPDATE_TARGET == 'terraform'
+        run: |
+          sed -i -e "s/terraform_version: [0-9.]\+/terraform_version: $(tfupdate release latest hashicorp/terraform)/g" .github/workflows/*
 
       - uses: EndBug/add-and-commit@8c12ff729a98cfbcd3fe38b49f55eceb98a5ec02 #v7.5
-        if: env.TFUPDATE_TARGET != 'terraform'
         with:
           branch: ${{ env.TFUPDATE_BRANCH }}
-          message: "tfupdate provider -r ${{ env.TFUPDATE_TARGET }}"
-
+          message: "Update latest"
 
       - name: Get the commit sha after tfupdate
         id: after-sha
