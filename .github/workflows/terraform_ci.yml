@@ -4,8 +4,9 @@ on:
   workflow_call:
     inputs:
       terraform_version:
-        required: true
+        required: false
         type: string
+        default: latest
 
       git_diff_relative:
         required: false
