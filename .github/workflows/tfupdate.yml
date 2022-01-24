@@ -80,11 +80,9 @@ jobs:
           sudo mv /tmp/tfupdate /usr/local/bin
           sudo chmod +x /usr/local/bin/tfupdate
 
+
       - if: env.TFUPDATE_TARGET == 'terraform'
         run: tfupdate terraform -r .
-
-      - if: env.TFUPDATE_TARGET != 'terraform'
-        run: tfupdate provider -r ${{ env.TFUPDATE_TARGET }} .
 
       - name: Update .terraform-version
         if: env.TFUPDATE_TARGET == 'terraform'
@@ -96,17 +94,29 @@ jobs:
 #        run: |
 #          sed -i -e "s/terraform_version: [0-9.]\+/terraform_version: $(tfupdate release latest hashicorp/terraform)/g" .github/workflows/*
 
-      - uses: EndBug/add-and-commit@8c12ff729a98cfbcd3fe38b49f55eceb98a5ec02 #v7.5
+      - name: Update .terraform.lock.hcl
+        # NOTE: In order to run terraform init without AWS credentials, switch backend to local.
         if: env.TFUPDATE_TARGET == 'terraform'
-        with:
-          branch: ${{ env.TFUPDATE_BRANCH }}
-          message: "tfupdate terraform -r ."
+        run: |
+          cat << EOF > _override.tf
+          terraform {
+            backend "local" {
+            }
+          }
+          EOF
+          terraform init -upgrade
+          terraform providers lock -platform linux_amd64 -platform darwin_amd64
+          rm _override.tf
+
+
+      - if: env.TFUPDATE_TARGET != 'terraform'
+        run: tfupdate provider -r ${{ env.TFUPDATE_TARGET }} .
+
 
       - uses: EndBug/add-and-commit@8c12ff729a98cfbcd3fe38b49f55eceb98a5ec02 #v7.5
-        if: env.TFUPDATE_TARGET != 'terraform'
         with:
           branch: ${{ env.TFUPDATE_BRANCH }}
-          message: "tfupdate provider -r ${{ env.TFUPDATE_TARGET }}"
+          message: "tfupdate on CI"
 
       - name: Get the commit sha after tfupdate
         id: after-sha
