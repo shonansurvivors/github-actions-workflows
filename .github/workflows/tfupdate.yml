@@ -111,16 +111,9 @@ jobs:
           rm _override.tf
 
       - uses: EndBug/add-and-commit@8c12ff729a98cfbcd3fe38b49f55eceb98a5ec02 #v7.5
-        if: env.TFUPDATE_TARGET == 'terraform'
         with:
           branch: ${{ env.TFUPDATE_BRANCH }}
-          message: "tfupdate terraform -r ."
-
-      - uses: EndBug/add-and-commit@8c12ff729a98cfbcd3fe38b49f55eceb98a5ec02 #v7.5
-        if: env.TFUPDATE_TARGET != 'terraform'
-        with:
-          branch: ${{ env.TFUPDATE_BRANCH }}
-          message: "tfupdate provider -r ${{ env.TFUPDATE_TARGET }}"
+          message: "tfupdate on CI"
 
       - name: Get the commit sha after tfupdate
         id: after-sha
