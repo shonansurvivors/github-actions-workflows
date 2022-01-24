@@ -80,11 +80,9 @@ jobs:
           sudo mv /tmp/tfupdate /usr/local/bin
           sudo chmod +x /usr/local/bin/tfupdate
 
+
       - if: env.TFUPDATE_TARGET == 'terraform'
         run: tfupdate terraform -r .
-
-      - if: env.TFUPDATE_TARGET != 'terraform'
-        run: tfupdate provider -r ${{ env.TFUPDATE_TARGET }} .
 
       - name: Update .terraform-version
         if: env.TFUPDATE_TARGET == 'terraform'
@@ -109,6 +107,11 @@ jobs:
           terraform init -upgrade
           terraform providers lock -platform linux_amd64 -platform darwin_amd64
           rm _override.tf
+
+
+      - if: env.TFUPDATE_TARGET != 'terraform'
+        run: tfupdate provider -r ${{ env.TFUPDATE_TARGET }} .
+
 
       - uses: EndBug/add-and-commit@8c12ff729a98cfbcd3fe38b49f55eceb98a5ec02 #v7.5
         with:
