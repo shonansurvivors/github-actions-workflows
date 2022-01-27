@@ -110,7 +110,7 @@ jobs:
         # NOTE: In order to run terraform init without AWS credentials, switch backend to local.
         if: env.TFUPDATE_TARGET == 'terraform'
         run: |
-          dirs=$(find . -type f -name '*.tf' -exec dirname {} \; | grep -v 'modules\|\.terraform' | uniq)
+          dirs=$(find ${TF_ROOT_DIR} -type f -name '*.tf' -exec dirname {} \; | grep -v 'modules\|\.terraform' | uniq)
           for dir in $dirs; do
             cd ${{ github.workspace }}/$dir
             cat << EOF > _override.tf
