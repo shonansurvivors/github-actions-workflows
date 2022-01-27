@@ -104,7 +104,7 @@ jobs:
       - uses: hashicorp/setup-terraform@v1
         if: env.TFUPDATE_TARGET == 'terraform'
         with:
-          terraform_version: ${{ step.get-terraform-latest-version-number.outputs.terraform_version }}
+          terraform_version: ${{ steps.get-terraform-latest-version-number.outputs.terraform_version }}
 
       - name: Update .terraform.lock.hcl
         # NOTE: In order to run terraform init without AWS credentials, switch backend to local.
