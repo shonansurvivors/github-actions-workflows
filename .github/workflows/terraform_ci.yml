@@ -25,6 +25,12 @@ on:
         type: string
         default: .tflint.hcl
 
+      tfsec_version:
+        required: false
+        type: string
+        default: latest
+
+
 jobs:
   fmt:
     runs-on: ubuntu-20.04
@@ -86,3 +92,25 @@ jobs:
           tflint --init --config=${{ github.workspace }}/${{ inputs.tflint_hcl_path }}
           tflint --config=${{ github.workspace }}/${{ inputs.tflint_hcl_path }}
         working-directory: ${{ matrix.TF_DIR }}
+
+  tfsec:
+    needs: set-matrix
+
+    if: needs.set-matrix.outputs.dirs != '[]'
+
+    runs-on: ubuntu-20.04
+
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        TF_DIR: ${{ fromJson(needs.set-matrix.outputs.dirs) }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: aquasecurity/tfsec-pr-commenter-action@274ee49538d9c31dcac422b27ba0b499d65a471c #v1.0.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tfsec_version: ${{ inputs.tfsec_version }}
+          working_directory: ${{ matrix.TF_DIR }}
