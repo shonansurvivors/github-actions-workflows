@@ -3,7 +3,7 @@ name: Terraform CI
 on:
   workflow_call:
     secrets:
-      github_token:
+      pr_commenter_token:
         required: true
 
     inputs:
@@ -114,6 +114,6 @@ jobs:
 
       - uses: aquasecurity/tfsec-pr-commenter-action@274ee49538d9c31dcac422b27ba0b499d65a471c #v1.0.3
         with:
-          github_token: ${{ secrets.github_token }}
+          github_token: ${{ secrets.pr_commenter_token }}
           tfsec_version: ${{ inputs.tfsec_version }}
           working_directory: ${{ matrix.TF_DIR }}
