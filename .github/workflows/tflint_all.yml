@@ -38,10 +38,10 @@ jobs:
 
       - name: Run tflint
         run: |
+          tflint --init --config=${{ github.workspace }}/${{ inputs.tflint_hcl_path }}
           dirs=$(find ${{ inputs.tf_root_dir }} -type f -name '*.tf' -exec dirname {} \; | grep -v '\.terraform' | uniq)
           for dir in $dirs; do
             cd ${{ github.workspace }}/$dir
-            tflint --init --config=${{ github.workspace }}/${{ inputs.tflint_hcl_path }}
             results+=$(tflint --force --config=${{ github.workspace }}/${{ inputs.tflint_hcl_path }})
           done
           if [ ${#results[@]} -eq 0 ]; then
