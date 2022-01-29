@@ -10,7 +10,7 @@ on:
       tflint_version:
         required: false
         type: string
-        default: 0.34.1
+        default: latest
       own_tflint_hcl_exists:
         required: false
         type: boolean
@@ -29,7 +29,7 @@ jobs:
 
       - uses: terraform-linters/setup-tflint@7cf6558386ea02736c0a5edd3031f39c2dfeb206 #v1.1.0
         with:
-          tflint_version: v${{ inputs.TFLINT_VERSION }}
+          tflint_version: ${{ inputs.TFLINT_VERSION }}
 
       - name: Download ready-made .tflint.hcl
         if: ${{ !inputs.own_tflint_hcl_exists }}
@@ -42,11 +42,5 @@ jobs:
           dirs=$(find ${{ inputs.tf_root_dir }} -type f -name '*.tf' -exec dirname {} \; | grep -v '\.terraform' | uniq)
           for dir in $dirs; do
             cd ${{ github.workspace }}/$dir
-            results+=$(tflint --force --config=${{ github.workspace }}/${{ inputs.tflint_hcl_path }})
+            tflint --force --config=${{ github.workspace }}/${{ inputs.tflint_hcl_path }}
           done
-          if [ ${#results[@]} -eq 0 ]; then
-            exit 0
-          else
-            echo "$results"
-            exit 1
-          fi
