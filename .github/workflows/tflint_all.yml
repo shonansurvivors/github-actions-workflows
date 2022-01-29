@@ -42,7 +42,7 @@ jobs:
           for dir in $dirs; do
             cd ${{ github.workspace }}/$dir
             tflint --init --config=${{ github.workspace }}/${{ inputs.tflint_hcl_path }}
-            results+=$(tflint --config=${{ github.workspace }}/${{ inputs.tflint_hcl_path }})
+            results+=$(tflint --force --config=${{ github.workspace }}/${{ inputs.tflint_hcl_path }})
           done
           if [ ${#results[@]} -eq 0 ]; then
             exit 0
