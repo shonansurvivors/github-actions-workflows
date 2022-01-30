@@ -44,6 +44,18 @@ jobs:
 
       - run: terraform fmt -recursive -check -diff
 
+  tfsec-all:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: aquasecurity/tfsec-pr-commenter-action@274ee49538d9c31dcac422b27ba0b499d65a471c #v1.0.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tfsec_version: ${{ inputs.tfsec_version }}
+          tfsec_args: '--force-all-dirs --exclude-downloaded-modules'
+
   set-matrix:
     runs-on: ubuntu-20.04
 
