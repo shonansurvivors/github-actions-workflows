@@ -7,6 +7,15 @@ on:
         required: false
         type: string
         default: latest
+      tf_root_dir:
+        required: false
+        type: string
+        default: .
+
+      tfsec_version:
+        required: false
+        type: string
+        default: latest
 
       git_diff_relative:
         required: false
@@ -25,12 +34,6 @@ on:
         type: string
         default: .tflint.hcl
 
-      tfsec_version:
-        required: false
-        type: string
-        default: latest
-
-
 jobs:
   fmt:
     runs-on: ubuntu-20.04
@@ -43,6 +46,7 @@ jobs:
           terraform_version: ${{ inputs.terraform_version }}
 
       - run: terraform fmt -recursive -check -diff
+        working-directory: ${{ inputs.tf_root_dir }}
 
   tfsec:
     runs-on: ubuntu-20.04
@@ -55,6 +59,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tfsec_version: ${{ inputs.tfsec_version }}
           tfsec_args: '--force-all-dirs --exclude-downloaded-modules'
+          working_directory: ${{ inputs.tf_root_dir }}
 
   set-matrix:
     runs-on: ubuntu-20.04
