@@ -18,7 +18,7 @@ on:
       tfupdate_target:
         required: false
         type: string
-        default: '["terraform","aws"]'
+        default: '["aws","terraform",]'
 
 env:
   TFUPDATE_BINARY: https://github.com/minamijoyo/tfupdate/releases/download/v0.6.3/tfupdate_0.6.3_linux_amd64.tar.gz
