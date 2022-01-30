@@ -7,6 +7,15 @@ on:
         required: false
         type: string
         default: latest
+      tf_root_dir:
+        required: false
+        type: string
+        default: .
+
+      tfsec_version:
+        required: false
+        type: string
+        default: latest
 
       git_diff_relative:
         required: false
@@ -25,12 +34,6 @@ on:
         type: string
         default: .tflint.hcl
 
-      tfsec_version:
-        required: false
-        type: string
-        default: latest
-
-
 jobs:
   fmt:
     runs-on: ubuntu-20.04
@@ -43,6 +46,20 @@ jobs:
           terraform_version: ${{ inputs.terraform_version }}
 
       - run: terraform fmt -recursive -check -diff
+        working-directory: ${{ inputs.tf_root_dir }}
+
+  tfsec:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: aquasecurity/tfsec-pr-commenter-action@274ee49538d9c31dcac422b27ba0b499d65a471c #v1.0.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tfsec_version: ${{ inputs.tfsec_version }}
+          tfsec_args: '--force-all-dirs --exclude-downloaded-modules'
+          working_directory: ${{ inputs.tf_root_dir }}
 
   set-matrix:
     runs-on: ubuntu-20.04
@@ -92,25 +109,3 @@ jobs:
           tflint --init --config=${{ github.workspace }}/${{ inputs.tflint_hcl_path }}
           tflint --config=${{ github.workspace }}/${{ inputs.tflint_hcl_path }}
         working-directory: ${{ matrix.TF_DIR }}
-
-  tfsec:
-    needs: set-matrix
-
-    if: needs.set-matrix.outputs.dirs != '[]'
-
-    runs-on: ubuntu-20.04
-
-    strategy:
-      fail-fast: false
-      max-parallel: 1
-      matrix:
-        TF_DIR: ${{ fromJson(needs.set-matrix.outputs.dirs) }}
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - uses: aquasecurity/tfsec-pr-commenter-action@274ee49538d9c31dcac422b27ba0b499d65a471c #v1.0.3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          tfsec_version: ${{ inputs.tfsec_version }}
-          working_directory: ${{ matrix.TF_DIR }}
