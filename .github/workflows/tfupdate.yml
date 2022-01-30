@@ -110,7 +110,6 @@ jobs:
         # NOTE: In order to run terraform init without AWS credentials, switch backend to local.
         if: env.TFUPDATE_TARGET == 'terraform'
         run: |
-          mkdir -p /github/home/.terraform.d/plugin-cache
           dirs=$(find ${TF_ROOT_DIR} -type f -name '*.tf' -exec dirname {} \; | grep -v 'modules\|\.terraform' | uniq)
           for dir in $dirs; do
             cd ${{ github.workspace }}/$dir
@@ -125,7 +124,7 @@ jobs:
             rm _override.tf
           done
         env:
-          TF_PLUGIN_CACHE_DIR: /github/home/.terraform.d/plugin-cache
+          TF_PLUGIN_CACHE_DIR: .terraform/plugin-cache
 
       - if: env.TFUPDATE_TARGET != 'terraform'
         run: tfupdate provider -r ${{ env.TFUPDATE_TARGET }} .
