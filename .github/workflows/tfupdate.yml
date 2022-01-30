@@ -119,12 +119,10 @@ jobs:
               }
             }
           EOF
-            terraform init
+            terraform init -upgrade
             terraform providers lock -platform linux_amd64 -platform darwin_amd64
             rm _override.tf
           done
-        env:
-          TF_PLUGIN_CACHE_DIR: ${{ github.workspace }}/.terraform/plugin-cache
 
       - if: env.TFUPDATE_TARGET != 'terraform'
         run: tfupdate provider -r ${{ env.TFUPDATE_TARGET }} .
