@@ -21,11 +21,5 @@ jobs:
 
       - run: go install github.com/aquasecurity/tfsec/cmd/tfsec@latest
 
-      - name: Run tfsec
-        run: |
-          dirs=$(find ${{ inputs.tf_root_dir }} -type f -name '*.tf' -exec dirname {} \; | grep -v '\.terraform' | uniq)
-          for dir in $dirs; do
-            echo $dir
-            cd ${{ github.workspace }}/$dir
-            tfsec . --soft-fail
-          done
+      - run: tfsec --force-all-dirs --exclude-downloaded-modules
+        working-directory: ${{ inputs.tf_root_dir }}
