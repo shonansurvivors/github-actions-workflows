@@ -15,10 +15,6 @@ on:
         required: false
         type: string
         default: .
-      tfupdate_target:
-        required: false
-        type: string
-        default: '["aws","terraform",]'
 
 env:
   TFUPDATE_BINARY: https://github.com/minamijoyo/tfupdate/releases/download/v0.6.3/tfupdate_0.6.3_linux_amd64.tar.gz
@@ -30,15 +26,8 @@ jobs:
   tfupdate:
     runs-on: ubuntu-20.04
 
-    strategy:
-      fail-fast: false
-      max-parallel: 1
-      matrix:
-        TFUPDATE_TARGET: ${{ fromJson(inputs.tfupdate_target) }}
-
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      TFUPDATE_TARGET: ${{ matrix.TFUPDATE_TARGET }}
 
     steps:
       - id: check-branch
@@ -80,35 +69,32 @@ jobs:
           sudo mv /tmp/tfupdate /usr/local/bin
           sudo chmod +x /usr/local/bin/tfupdate
 
+      # Providers
+      - run: tfupdate provider -r aws .
 
-      - if: env.TFUPDATE_TARGET == 'terraform'
-        run: tfupdate terraform -r .
+      # Terraform
+      - run: tfupdate terraform -r .
 
       - name: Update .terraform-version
-        if: env.TFUPDATE_TARGET == 'terraform'
         run: |
           find . -type f -name .terraform-version | xargs sed -i -e "s/[0-9.]\+/$(tfupdate release latest hashicorp/terraform)/g"
 
 #      - name: Update terraform_version in GitHub Actions workflow files
-#        if: env.TFUPDATE_TARGET == 'terraform'
 #        run: |
 #          sed -i -e "s/terraform_version: [0-9.]\+/terraform_version: $(tfupdate release latest hashicorp/terraform)/g" .github/workflows/*
 
       - name: Get Terraform latest version number
-        if: env.TFUPDATE_TARGET == 'terraform'
         id: get-terraform-latest-version-number
         run: |
           ver=$(tfupdate release latest hashicorp/terraform)
           echo "::set-output name=terraform_version::$ver"
 
       - uses: hashicorp/setup-terraform@v1
-        if: env.TFUPDATE_TARGET == 'terraform'
         with:
           terraform_version: ${{ steps.get-terraform-latest-version-number.outputs.terraform_version }}
 
       - name: Update .terraform.lock.hcl
         # NOTE: In order to run terraform init without AWS credentials, switch backend to local.
-        if: env.TFUPDATE_TARGET == 'terraform'
         run: |
           dirs=$(find ${TF_ROOT_DIR} -type f -name '*.tf' -exec dirname {} \; | grep -v 'modules\|\.terraform' | uniq)
           for dir in $dirs; do
@@ -123,9 +109,6 @@ jobs:
             terraform providers lock -platform linux_amd64 -platform darwin_amd64
             rm _override.tf
           done
-
-      - if: env.TFUPDATE_TARGET != 'terraform'
-        run: tfupdate provider -r ${{ env.TFUPDATE_TARGET }} .
 
 
       - uses: EndBug/add-and-commit@8c12ff729a98cfbcd3fe38b49f55eceb98a5ec02 #v7.5
