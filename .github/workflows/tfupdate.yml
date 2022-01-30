@@ -124,7 +124,7 @@ jobs:
             rm _override.tf
           done
         env:
-          TF_PLUGIN_CACHE_DIR: ${{ env.HOME }}/.terraform.d/plugin-cache
+          TF_PLUGIN_CACHE_DIR: ${{ github.workspace }}/.terraform/plugin-cache
 
       - if: env.TFUPDATE_TARGET != 'terraform'
         run: tfupdate provider -r ${{ env.TFUPDATE_TARGET }} .
