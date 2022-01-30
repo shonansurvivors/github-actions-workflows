@@ -118,7 +118,7 @@ jobs:
               backend "local" {
               }
             }
-            EOF
+          EOF
             terraform init -upgrade
             terraform providers lock -platform linux_amd64 -platform darwin_amd64
             rm _override.tf
